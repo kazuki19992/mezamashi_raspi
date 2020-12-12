@@ -3,4 +3,4 @@
 http://commons.nicovideo.jp/material/nc227220
 
 ## mezamashi_voice.wav
-http://commons.nicovideo.jp/material/agreement/nc176463
+http://commons.nicovideo.jp/material/nc176463
