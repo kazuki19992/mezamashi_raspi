@@ -29,16 +29,24 @@ wiringpi.pullUpDnControl( button_pin, 2 )
 # アラーム用
 alarm = False
 
-cnt = 0
+first = True;
 
 # whileの処理は字下げをするとループの範囲になる（らしい）
 while True:
+	print(first)
+
     # GPIO端子の状態を読み込む
 	# ボタンを押すと「0」、放すと「1」になる
 	# GPIOの状態が0V(0)であるか比較
 	if( wiringpi.digitalRead(button_pin) == 0 ):
 		# 0V(0)の場合に表示
 		print ("Switch ON")
+		# 初回呼び出し時はアラームを有効化する
+		if(first):
+			res = requests.get(apiUrl + '/set')
+			data = json.loads(res.text)
+			assert data["res"] == "success"
+			first = False
 
 		# cnt += 1
 		
@@ -49,18 +57,30 @@ while True:
 		# 結果はJSON形式
 		data = json.loads(res.text)
 		# 結果をコンソールに出力
-		print("設定時刻: ", data["set"])
-		print("現在時刻: ", data["now"])
-		print("アラーム: ", data["alarm"])
+		# print("設定時刻: ", data["set"])
+		# print("現在時刻: ", data["now"])
+		# print("アラーム: ", data["alarm"])
 
 		if(data["alarm"] == "true"):
-			print("鳴ったよ")
+			# print("鳴ったよ")
 			subprocess.run(['aplay', 'Alarm.wav'])
 			cnt = 0
 
 
 
 	else:
+		if(first == False):
+			first = True
+			print("無効化しました")
+			# アラームを無効化する
+			data = {"msg":"goodMng_stopPlz"}
+			res = requests.post(apiUrl + '/stop', data=data)
+			data = json.loads(res.text)
+			print(data["res"])
+			# 次回呼ばれたときに有効化するためにfirstをTrueにする
+		else:
+			print("無効化してるよ！")
+
 		# 3.3V(1)の場合に表示
 		print ("Switch OFF")
 		cnt = 0
